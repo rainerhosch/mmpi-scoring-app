@@ -126,6 +126,10 @@ const StartPage = () => {
           {loading ? 'Memulai...' : 'Mulai Tes'}
         </button>
       </form>
+
+      <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#fff3cd', color: '#856404', borderRadius: '4px', fontSize: '0.85rem', textAlign: 'center', border: '1px solid #ffeeba' }}>
+        <strong>Disclaimer:</strong> Ini hanyalah sebuah tes simulasi dan tidak dapat dipakai sebagai rujukan medis riil. Untuk melakukan tes medis atau psikologi secara resmi, disarankan untuk melakukan tes ke rumah sakit, psikolog, atau dokter yang memiliki legalitas di bidang ini.
+      </div>
     </div>
   );
 };
