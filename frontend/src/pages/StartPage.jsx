@@ -6,8 +6,11 @@ const StartPage = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
-    age: '',
+    dob: '',
     gender: 'M',
+    address: '',
+    email: '',
+    phone: '',
   });
   const [loading, setLoading] = useState(false);
 
@@ -17,11 +20,11 @@ const StartPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.age) return;
+    if (!formData.name || !formData.dob) return;
     
     setLoading(true);
     try {
-      const user = await createUser({ ...formData, age: parseInt(formData.age) });
+      const user = await createUser(formData);
       const session = await startSession(user.id);
       
       // Store session id to local storage
@@ -59,15 +62,14 @@ const StartPage = () => {
         </div>
         
         <div className="form-group">
-          <label className="form-label">Usia</label>
+          <label className="form-label">Tanggal Lahir</label>
           <input 
-            type="number" 
-            name="age"
+            type="date" 
+            name="dob"
             className="form-control" 
-            value={formData.age} 
+            value={formData.dob} 
             onChange={handleChange} 
             required 
-            placeholder="Masukkan usia"
           />
         </div>
         
@@ -82,6 +84,42 @@ const StartPage = () => {
             <option value="M">Laki-laki</option>
             <option value="F">Perempuan</option>
           </select>
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Alamat</label>
+          <input 
+            type="text" 
+            name="address"
+            className="form-control" 
+            value={formData.address} 
+            onChange={handleChange} 
+            placeholder="Masukkan alamat"
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Email</label>
+          <input 
+            type="email" 
+            name="email"
+            className="form-control" 
+            value={formData.email} 
+            onChange={handleChange} 
+            placeholder="Masukkan email"
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">No Hp</label>
+          <input 
+            type="text" 
+            name="phone"
+            className="form-control" 
+            value={formData.phone} 
+            onChange={handleChange} 
+            placeholder="Masukkan no handphone"
+          />
         </div>
         
         <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} disabled={loading}>

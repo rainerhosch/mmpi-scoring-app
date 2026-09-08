@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, date
 
 class QuestionResponse(BaseModel):
     id: int
@@ -8,13 +8,15 @@ class QuestionResponse(BaseModel):
     text: str
 
     class Config:
-        orm_mode = True
         from_attributes = True
 
 class UserCreate(BaseModel):
     name: str
-    age: int
+    dob: date
     gender: str
+    address: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
 
 class SessionCreate(BaseModel):
     user_id: int

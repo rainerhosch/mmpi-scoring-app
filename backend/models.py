@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean, DateTime, Date
 from sqlalchemy.orm import relationship
 from database import Base
 from datetime import datetime
@@ -7,8 +7,12 @@ class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), index=True)
+    dob = Column(Date)
     age = Column(Integer)
     gender = Column(String(10)) # M / F
+    address = Column(String(255))
+    email = Column(String(100))
+    phone = Column(String(50))
     created_at = Column(DateTime, default=datetime.utcnow)
 
     sessions = relationship("Session", back_populates="user")

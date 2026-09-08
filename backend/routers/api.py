@@ -4,12 +4,20 @@ from typing import List
 from database import get_db
 import models, schemas
 import scoring_engine
+from datetime import date
 
 router = APIRouter()
 
 @router.post("/users", response_model=dict)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    db_user = models.User(**user.model_dump())
+    # Calculate age from dob
+    today = date.today()
+    age = today.year - user.dob.year - ((today.month, today.day) < (user.dob.month, user.dob.day))
+    
+    user_data = user.model_dump()
+    user_data['age'] = age
+    
+    db_user = models.User(**user_data)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
