@@ -5,7 +5,7 @@ import models
 
 def main():
     print("Reading HTML file...")
-    html = open('../docs/soal.html', 'r', encoding='utf-8').read()
+    html = open('../docs/soal.html.php', 'r', encoding='utf-8').read()
     soup = BeautifulSoup(html, 'html.parser')
 
     texts = soup.stripped_strings

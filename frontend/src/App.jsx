@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import StartPage from './pages/StartPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import DashboardPage from './pages/DashboardPage';
 import TestPage from './pages/TestPage';
 import ResultPage from './pages/ResultPage';
 
@@ -9,9 +11,11 @@ function App() {
     <Router>
       <div className="app-container">
         <Routes>
-          <Route path="/" element={<StartPage />} />
-          <Route path="/test" element={<TestPage />} />
-          <Route path="/results" element={<ResultPage />} />
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/test/:id" element={<TestPage />} />
+          <Route path="/result/:id" element={<ResultPage />} />
         </Routes>
       </div>
     </Router>

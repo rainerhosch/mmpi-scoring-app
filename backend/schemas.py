@@ -14,9 +14,18 @@ class UserCreate(BaseModel):
     name: str
     dob: date
     gender: str
+    password: str
     address: Optional[str] = None
-    email: Optional[str] = None
+    email: str
     phone: Optional[str] = None
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    email: Optional[str] = None
+
 
 class SessionCreate(BaseModel):
     user_id: int

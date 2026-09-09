@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import QuestionCard from '../components/QuestionCard';
 import { getQuestions, submitAnswers } from '../api';
 
 const TestPage = () => {
   const navigate = useNavigate();
+  const { id: sessionId } = useParams();
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState([]);
+  const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -27,7 +28,7 @@ const TestPage = () => {
 
   const handleAnswer = async (questionId, answer) => {
     // Record answer
-    const newAnswers = [...answers, { question_id: questionId, answer }];
+    const newAnswers = { ...answers, [questionId]: answer };
     setAnswers(newAnswers);
 
     // Next question or submit
@@ -35,16 +36,27 @@ const TestPage = () => {
       setCurrentIndex(currentIndex + 1);
     } else {
       // Finished all questions
-      await submitAllAnswers(newAnswers);
+      await handleSubmit(newAnswers);
     }
   };
 
-  const submitAllAnswers = async (finalAnswers) => {
+  const handleSubmit = async (finalAnswers) => {
+    if (!sessionId) {
+      alert('Sesi tidak valid.');
+      navigate('/dashboard');
+      return;
+    }
+    
     setSubmitting(true);
     try {
-      const sessionId = localStorage.getItem('mmpi_session_id');
-      await submitAnswers(sessionId, finalAnswers);
-      navigate('/results');
+      // Format answers
+      const answersList = Object.entries(finalAnswers).map(([qId, ans]) => ({
+        question_id: parseInt(qId),
+        answer: ans
+      }));
+      
+      await submitAnswers(sessionId, answersList);
+      navigate(`/result/${sessionId}`);
     } catch (error) {
       console.error('Error submitting answers:', error);
       alert('Gagal menyimpan jawaban.');

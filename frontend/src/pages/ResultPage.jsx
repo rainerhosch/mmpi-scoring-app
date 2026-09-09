@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getResults } from '../api';
 import ResultChart from '../components/ResultChart';
 
 const ResultPage = () => {
+  const { id: sessionId } = useParams();
+  const navigate = useNavigate();
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const sessionId = localStorage.getItem('mmpi_session_id');
         if (!sessionId) {
           alert('Tidak ada sesi yang aktif.');
           return;
@@ -51,8 +53,8 @@ const ResultPage = () => {
       <ResultChart tScores={result.t_scores} />
 
       <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-        <button className="btn btn-outline" onClick={() => window.location.href = '/'}>
-          Kembali ke Beranda
+        <button className="btn btn-outline" onClick={() => navigate('/dashboard')}>
+          Kembali ke Dashboard
         </button>
       </div>
     </div>

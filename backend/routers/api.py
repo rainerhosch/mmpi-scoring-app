@@ -6,22 +6,44 @@ import models, schemas
 import scoring_engine
 from datetime import date
 
+from routers.auth import get_current_user
+
 router = APIRouter()
 
-@router.post("/users", response_model=dict)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    # Calculate age from dob
-    today = date.today()
-    age = today.year - user.dob.year - ((today.month, today.day) < (user.dob.month, user.dob.day))
+@router.get("/users/me", response_model=dict)
+def get_me(current_user: models.User = Depends(get_current_user)):
+    return {
+        "id": current_user.id,
+        "name": current_user.name,
+        "email": current_user.email,
+        "role": current_user.role
+    }
+
+@router.get("/users/me/sessions")
+def get_my_sessions(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    sessions = db.query(models.Session).filter(models.Session.user_id == current_user.id).order_by(models.Session.started_at.desc()).all()
     
-    user_data = user.model_dump()
-    user_data['age'] = age
-    
-    db_user = models.User(**user_data)
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return {"id": db_user.id, "name": db_user.name}
+    result = []
+    for s in sessions:
+        # Check if valid
+        validity = True
+        has_results = False
+        res = db.query(models.Result).filter(models.Result.session_id == s.id).first()
+        if res:
+            has_results = True
+            if not res.is_valid:
+                validity = False
+                
+        result.append({
+            "id": s.id,
+            "status": s.status,
+            "started_at": s.started_at,
+            "completed_at": s.completed_at,
+            "has_results": has_results,
+            "is_valid": validity
+        })
+    return result
+
 
 @router.get("/questions", response_model=List[schemas.QuestionResponse])
 def get_questions(skip: int = 0, limit: int = 600, db: Session = Depends(get_db)):
@@ -29,16 +51,16 @@ def get_questions(skip: int = 0, limit: int = 600, db: Session = Depends(get_db)
     return questions
 
 @router.post("/sessions", response_model=dict)
-def start_session(session_data: schemas.SessionCreate, db: Session = Depends(get_db)):
-    db_session = models.Session(user_id=session_data.user_id)
+def start_session(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db_session = models.Session(user_id=current_user.id)
     db.add(db_session)
     db.commit()
     db.refresh(db_session)
     return {"session_id": db_session.id}
 
 @router.post("/sessions/{session_id}/submit")
-def submit_answers(session_id: int, data: schemas.AnswersSubmitBulk, db: Session = Depends(get_db)):
-    session = db.query(models.Session).filter(models.Session.id == session_id).first()
+def submit_answers(session_id: int, data: schemas.AnswersSubmitBulk, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    session = db.query(models.Session).filter(models.Session.id == session_id, models.Session.user_id == current_user.id).first()
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
         
@@ -63,8 +85,8 @@ def submit_answers(session_id: int, data: schemas.AnswersSubmitBulk, db: Session
     return {"message": "Answers saved successfully"}
 
 @router.post("/sessions/{session_id}/score", response_model=schemas.ResultResponse)
-def calculate_session_score(session_id: int, db: Session = Depends(get_db)):
-    session = db.query(models.Session).filter(models.Session.id == session_id).first()
+def calculate_session_score(session_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    session = db.query(models.Session).filter(models.Session.id == session_id, models.Session.user_id == current_user.id).first()
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
         
@@ -72,8 +94,8 @@ def calculate_session_score(session_id: int, db: Session = Depends(get_db)):
     return results
 
 @router.get("/sessions/{session_id}/results", response_model=schemas.ResultResponse)
-def get_session_results(session_id: int, db: Session = Depends(get_db)):
-    session = db.query(models.Session).filter(models.Session.id == session_id).first()
+def get_session_results(session_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    session = db.query(models.Session).filter(models.Session.id == session_id, models.Session.user_id == current_user.id).first()
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
         

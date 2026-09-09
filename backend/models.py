@@ -11,8 +11,10 @@ class User(Base):
     age = Column(Integer)
     gender = Column(String(10)) # M / F
     address = Column(String(255))
-    email = Column(String(100))
+    email = Column(String(100), unique=True, index=True)
     phone = Column(String(50))
+    hashed_password = Column(String(255))
+    role = Column(String(20), default="user")
     created_at = Column(DateTime, default=datetime.utcnow)
 
     sessions = relationship("Session", back_populates="user")
